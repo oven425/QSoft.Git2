@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace QSoft.Git
@@ -25,10 +26,32 @@ namespace QSoft.Git
             using( var stream = File.OpenRead(fullname))
             using(var zlib = new ZLibStream(stream, CompressionMode.Decompress))
             {
-                int realen = zlib.Read(readbuf);
-                obj.Type = Encoding.ASCII.GetString(readbuf);
-                realen = zlib.Read(readbuf);
-                obj.Length = BitConverter.ToInt32(readbuf, 0);
+                var headers = new List<byte>();
+                while(true)
+                {
+                    var bb = zlib.ReadByte();
+                    if(bb ==0)
+                    {
+                        break;
+                    }
+                    else if(bb == -1)
+                    {
+                        throw new Exception("No find header");
+                    }
+                    headers.Add((byte)bb);
+                }
+                var headerstr = Encoding.ASCII.GetString(headers.ToArray());
+                var regex = new Regex(@"(?<type>\w+) (?<length>\d+)");
+                var match = regex.Match(headerstr);
+                if(match.Success)
+                {
+                    obj.Type = match.Groups["type"].Value;
+                    obj.Length = int.Parse(match.Groups["length"].Value);
+                }
+                else
+                {
+                    throw new Exception("parse Blob header fail");
+                }
             }
             
             return obj;
