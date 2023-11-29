@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO.Compression;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -52,6 +53,27 @@ namespace QSoft.Git
                 {
                     throw new Exception("parse Blob header fail");
                 }
+
+                var kk = new byte[4096];
+                var len = zlib.Read(kk);
+                List<byte[]> lls = new List<byte[]>();
+                var stratindex = 0;
+                
+                while(true)
+                {
+                    var endindex = Array.FindIndex(kk, stratindex, x => x==0);
+                    lls.Add(kk.Skip(stratindex).Take(endindex-stratindex).ToArray());
+                    if(endindex == len)
+                    {
+                        break;
+                    }
+                    stratindex = endindex+1;
+                }
+                //5ee6f40cf477ee5bc16227d4dd71b529cc8d765d3130303634342051536f66742e4769742e637370726f6a
+                //  e6f40cf477ee5bc16227d4dd71b529cc8d765d
+                var tt = Encoding.ASCII.GetString(lls[0]);
+                var hhs = BitConverter.ToString(lls[1]).Replace("-", "").ToLowerInvariant();
+                var hhs1 = BitConverter.ToString(lls[2]).Replace("-", "").ToLowerInvariant();
             }
             
             return obj;
