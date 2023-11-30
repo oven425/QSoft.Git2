@@ -10,8 +10,32 @@ using System.Threading.Tasks;
 
 namespace QSoft.Git
 {
-    public class Object
+    public class GitObjectBlob : GitObject
     {
+        public GitObjectBlob(GitObject gitobject)
+            :base(gitobject)
+        {
+
+        }
+    }
+
+    public class GitObjectTree: GitObject
+    {
+
+    }
+    public class GitObject
+    {
+        public GitObject()
+        {
+
+        }
+
+        public GitObject(GitObject gitobject)
+        {
+            this.FullName = gitobject.FullName;
+            this.Type = gitobject.Type;
+            this.Length = gitobject.Length;
+        }
         public string Type { set; get; }
         public int Length { set; get; }
         public string FullName { private set; get; }
@@ -21,7 +45,7 @@ namespace QSoft.Git
             {
                 throw new FileNotFoundException();
             }
-            Object obj = new Object();
+            var obj = new GitObject();
             obj.FullName = fullname;
             var readbuf = new byte[4];
             using( var stream = File.OpenRead(fullname))
