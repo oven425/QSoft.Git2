@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.IO.Compression;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -8,58 +9,50 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace QSoft.Git
+namespace QSoft.Git.Object
 {
-    public class GitObjectBlob : GitObject
+    public class Blob
     {
-        public GitObjectBlob(GitObject gitobject)
-            :base(gitobject)
-        {
-
-        }
-    }
-
-    public class GitObjectTree: GitObject
-    {
-
-    }
-    public class GitObject
-    {
-        public GitObject()
-        {
-
-        }
-
-        public GitObject(GitObject gitobject)
-        {
-            this.FullName = gitobject.FullName;
-            this.Type = gitobject.Type;
-            this.Length = gitobject.Length;
-        }
         public string Type { set; get; }
-        public int Length { set; get; }
+        public Range Length { set; get; } = new Range(10, 10);
         public string FullName { private set; get; }
-        public static Object Open(string fullname)
+    }
+
+    public static class GitObjectExtension
+    {
+        public static IEnumerable<(string type, Range contentrange, string filename)> EnumbleObject(this string objectfolder)
         {
-            if(File.Exists(fullname)==false)
+            DirectoryInfo d11d = new DirectoryInfo(objectfolder);
+            var aaa = d11d.EnumerateDirectories();
+            var dirs = Directory.EnumerateDirectories(objectfolder)
+                .Select(x => Path.GetDirectoryName(x));
+            
+            var files = Directory.EnumerateDirectories(objectfolder)
+                .SelectMany(x => Directory.EnumerateFiles(x));
+            foreach(var oo in files)
             {
-                throw new FileNotFoundException();
+                System.Diagnostics.Trace.WriteLine(oo);
+                var dd = oo.ParseObject();
+                yield return (dd.type, dd.datarange, oo);
             }
-            var obj = new GitObject();
-            obj.FullName = fullname;
-            var readbuf = new byte[4];
-            using( var stream = File.OpenRead(fullname))
-            using(var zlib = new ZLibStream(stream, CompressionMode.Decompress))
+        }
+
+        public static (string type, Range datarange) ParseObject(this string fullname)
+        {
+            long zeroindex = 0;
+            using (var stream = File.OpenRead(fullname))
+            using (var zlib = new ZLibStream(stream, CompressionMode.Decompress))
             {
                 var headers = new List<byte>();
-                while(true)
+                while (true)
                 {
                     var bb = zlib.ReadByte();
-                    if(bb ==0)
+                    if (bb == 0)
                     {
+                        zeroindex = zlib.BaseStream.Position;
                         break;
                     }
-                    else if(bb == -1)
+                    else if (bb == -1)
                     {
                         throw new Exception("No find header");
                     }
@@ -68,40 +61,97 @@ namespace QSoft.Git
                 var headerstr = Encoding.ASCII.GetString(headers.ToArray());
                 var regex = new Regex(@"(?<type>\w+) (?<length>\d+)");
                 var match = regex.Match(headerstr);
-                if(match.Success)
+                if (match.Success)
                 {
-                    obj.Type = match.Groups["type"].Value;
-                    obj.Length = int.Parse(match.Groups["length"].Value);
+                    //obj.Type = match.Groups["type"].Value;
+                    //obj.Length = int.Parse(match.Groups["length"].Value);
+                   var len= int.Parse(match.Groups["length"].Value);
+                    var range = new Range(new Index((int)zeroindex), new Index(len));
+                    return (match.Groups["type"].Value, range);
                 }
                 else
                 {
                     throw new Exception("parse Blob header fail");
                 }
-
-                var kk = new byte[4096];
-                var len = zlib.Read(kk);
-                List<byte[]> lls = new List<byte[]>();
-                var stratindex = 0;
-                
-                while(true)
-                {
-                    var endindex = Array.FindIndex(kk, stratindex, x => x==0);
-                    lls.Add(kk.Skip(stratindex).Take(endindex-stratindex).ToArray());
-                    if(endindex == len)
-                    {
-                        break;
-                    }
-                    stratindex = endindex+1;
-                }
-                //5ee6f40cf477ee5bc16227d4dd71b529cc8d765d3130303634342051536f66742e4769742e637370726f6a
-                //  e6f40cf477ee5bc16227d4dd71b529cc8d765d
-                var tt = Encoding.ASCII.GetString(lls[0]);
-                var hhs = BitConverter.ToString(lls[1]).Replace("-", "").ToLowerInvariant();
-                var hhs1 = BitConverter.ToString(lls[2]).Replace("-", "").ToLowerInvariant();
             }
-            
-            return obj;
         }
+    }
+    public class GitObject
+    {
+        public GitObject()
+        {
+
+        }
+
+        public string Type { set; get; }
+        public int Length { set; get; }
+        public string FullName { private set; get; }
+        public int Offset { set; get; }
+        
+
+        //public static GitObject Open(string fullname)
+        //{
+        //    if(File.Exists(fullname)==false)
+        //    {
+        //        throw new FileNotFoundException();
+        //    }
+        //    var obj = new GitObject();
+        //    obj.FullName = fullname;
+        //    var readbuf = new byte[4];
+        //    using( var stream = File.OpenRead(fullname))
+        //    using(var zlib = new ZLibStream(stream, CompressionMode.Decompress))
+        //    {
+        //        var headers = new List<byte>();
+        //        while(true)
+        //        {
+        //            var bb = zlib.ReadByte();
+        //            if(bb ==0)
+        //            {
+        //                break;
+        //            }
+        //            else if(bb == -1)
+        //            {
+        //                throw new Exception("No find header");
+        //            }
+        //            headers.Add((byte)bb);
+        //        }
+        //        var headerstr = Encoding.ASCII.GetString(headers.ToArray());
+        //        var regex = new Regex(@"(?<type>\w+) (?<length>\d+)");
+        //        var match = regex.Match(headerstr);
+        //        if(match.Success)
+        //        {
+        //            obj.Type = match.Groups["type"].Value;
+        //            obj.Length = int.Parse(match.Groups["length"].Value);
+        //        }
+        //        else
+        //        {
+        //            throw new Exception("parse Blob header fail");
+        //        }
+
+        //        var kk = new byte[4096];
+        //        var len = zlib.Read(kk);
+        //        List<byte[]> lls = new List<byte[]>();
+        //        var stratindex = 0;
+                
+        //        while(true)
+        //        {
+        //            var endindex = Array.FindIndex(kk, stratindex, x => x==0);
+        //            lls.Add(kk.Skip(stratindex).Take(endindex-stratindex).ToArray());
+        //            if(endindex == len)
+        //            {
+        //                break;
+        //            }
+        //            stratindex = endindex+1;
+        //        }
+        //        //5ee6f40cf477ee5bc16227d4dd71b529cc8d765d3130303634342051536f66742e4769742e637370726f6a
+        //        //  e6f40cf477ee5bc16227d4dd71b529cc8d765d
+        //        var tt = Encoding.ASCII.GetString(lls[0]);
+        //        var hhs = BitConverter.ToString(lls[1]).Replace("-", "").ToLowerInvariant();
+        //        var hhs1 = BitConverter.ToString(lls[2]).Replace("-", "").ToLowerInvariant();
+        //    }
+            
+        //    return obj;
+        //}
 
         
     }

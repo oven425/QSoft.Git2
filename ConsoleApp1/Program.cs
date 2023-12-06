@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using QSoft.Git.Object;
 using System.Buffers.Binary;
 using System.IO.Compression;
 using System.Security.Cryptography;
@@ -56,12 +57,17 @@ string GetHash(HashAlgorithm hashAlgorithm, string input)
     // Return the hexadecimal string.
     return sBuilder.ToString();
 }
+var range=new Range(new Index(10), new Index(20));
 
 var objectfolder = @"C:\Users\oven4\source\repos\QSoft.Git2\.git\objects";
+var objs= objectfolder.EnumbleObject().ToList();
 var dirs = Directory.EnumerateDirectories(objectfolder)
     .SelectMany(x => Directory.EnumerateFiles(x));
-            
-QSoft.Git.GitObject.Open(@"C:\Users\oven4\source\repos\QSoft.Git2\.git\objects\ee\df73ee7bb34736f36685803de2fdb8eb1124a9");
+//foreach(var file in dirs)
+//{
+//    GitObject.Open(file);
+//}
+//QSoft.Git.Object.GitObject.Open(@"C:\Users\oven4\source\repos\QSoft.Git2\.git\objects\ee\df73ee7bb34736f36685803de2fdb8eb1124a9");
 
 
 Console.WriteLine("Hello, World!");
