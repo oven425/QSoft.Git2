@@ -5,13 +5,10 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 
-//var objfile = @"C:\Users\oven4\source\repos\QSoft.Git2\.git\objects\4e\f4278d2c878ce29a361cabc8f1fea04efdf6f5";
+//1701874466
 
-//using(var file = File.OpenRead(objfile))
-//using(var zlib = new ZLibStream(file, CompressionMode.Decompress))
-//{
-
-//}
+DateTime basetime = new DateTime(1970, 1, 1);
+var tt = basetime.AddSeconds(1701874466).AddHours(8);
 //要計算的內容
 var content = "Hello, 5xRuby";
 
@@ -60,7 +57,22 @@ string GetHash(HashAlgorithm hashAlgorithm, string input)
 var range=new Range(new Index(10), new Index(20));
 
 var objectfolder = @"C:\Users\oven4\source\repos\QSoft.Git2\.git\objects";
-var objs= objectfolder.EnumbleObject().ToList();
+var objs = objectfolder.EnumbleObject();
+foreach (var oo in objs)
+{
+    if(oo.type == "blob")
+    {
+        oo.ReadBlob();
+    }
+    else if (oo.type == "tree")
+    {
+        oo.ReadTree();
+    }
+    else if (oo.type == "commit")
+    {
+        oo.ReadCommit();
+    }
+}
 var dirs = Directory.EnumerateDirectories(objectfolder)
     .SelectMany(x => Directory.EnumerateFiles(x));
 //foreach(var file in dirs)

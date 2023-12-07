@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
@@ -20,24 +21,79 @@ namespace QSoft.Git.Object
 
     public static class GitObjectExtension
     {
-        public static IEnumerable<(string type, Range contentrange, string filename)> EnumbleObject(this string objectfolder)
+        public static IEnumerable<(string type, long offset, int size, string filename)> EnumbleObject(this string objectfolder)
         {
             DirectoryInfo d11d = new DirectoryInfo(objectfolder);
             var aaa = d11d.EnumerateDirectories();
             var dirs = Directory.EnumerateDirectories(objectfolder)
-                .Select(x => Path.GetDirectoryName(x));
-            
+                .Where(x => x.LastIndexOf("pack") == -1)
+                .Where(x => x.LastIndexOf("info") == -1);
+            var aoi = dirs.ElementAt(0).LastIndexOf("pack");
             var files = Directory.EnumerateDirectories(objectfolder)
+                .Where(x => x.LastIndexOf("pack") == -1)
+                .Where(x => x.LastIndexOf("info") == -1)
                 .SelectMany(x => Directory.EnumerateFiles(x));
             foreach(var oo in files)
             {
                 System.Diagnostics.Trace.WriteLine(oo);
                 var dd = oo.ParseObject();
-                yield return (dd.type, dd.datarange, oo);
+                yield return (dd.type, dd.offset, dd.size, oo);
             }
         }
 
-        public static (string type, Range datarange) ParseObject(this string fullname)
+        public static string ReadBlob(this (string type, long offset, int size, string filename) src)
+        {
+            using( var stream = File.OpenRead(src.filename))
+            using(var zlib = new ZLibStream(stream, CompressionMode.Decompress))
+            {
+                var buf = new byte[4096];
+                zlib.Read(buf, 0, (int)src.offset);
+                zlib.Read(buf, 0, src.size);
+                var str = Encoding.UTF8.GetString(buf);
+                return str;
+            }
+        }
+
+        public static string ReadTree(this (string type, long offset, int size, string filename) src)
+        {
+            using (var stream = File.OpenRead(src.filename))
+            using (var zlib = new ZLibStream(stream, CompressionMode.Decompress))
+            {
+                var buf = new byte[4096];
+                zlib.Read(buf, 0, (int)src.offset);
+                zlib.Read(buf, 0, src.size);
+                var str = Encoding.UTF8.GetString(buf);
+                return str;
+            }
+        }
+
+        public static string ReadCommit(this (string type, long offset, int size, string filename) src)
+        {
+            using (var stream = File.OpenRead(src.filename))
+            using (var zlib = new ZLibStream(stream, CompressionMode.Decompress))
+            {
+                var buf = new byte[4096];
+                zlib.Read(buf, 0, (int)src.offset);
+                zlib.Read(buf, 0, src.size);
+                var str = Encoding.UTF8.GetString(buf);
+//tree db2c57d040432f1cba0a44e9322e37a0262dfe79
+//parent c35f5da934412efad46bfdd612f2891c1d06b9f3
+//author oven425<oven425@yahoo.com.tw> 1701874466 + 0800
+//committer oven425<oven425@yahoo.com.tw> 1701874466 + 0800
+
+//update
+//1.parse object
+                var regex = new Regex(@"tree (?<tree>\w+)\r\nparent (?<parent>)");
+                var hr = regex.Match(str);
+                if (hr.Success)
+                {
+
+                }
+                return str;
+            }
+        }
+
+        public static (string type, long offset, int size) ParseObject(this string fullname)
         {
             long zeroindex = 0;
             using (var stream = File.OpenRead(fullname))
@@ -66,8 +122,8 @@ namespace QSoft.Git.Object
                     //obj.Type = match.Groups["type"].Value;
                     //obj.Length = int.Parse(match.Groups["length"].Value);
                    var len= int.Parse(match.Groups["length"].Value);
-                    var range = new Range(new Index((int)zeroindex), new Index(len));
-                    return (match.Groups["type"].Value, range);
+                    //var range = new Range(new Index((int)zeroindex), new Index(len));
+                    return (match.Groups["type"].Value, headers.Count+1, len);
                 }
                 else
                 {
