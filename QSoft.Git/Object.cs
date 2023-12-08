@@ -48,23 +48,73 @@ namespace QSoft.Git.Object
             {
                 var buf = new byte[4096];
                 zlib.Read(buf, 0, (int)src.offset);
+                buf = new byte[src.size];
                 zlib.Read(buf, 0, src.size);
                 var str = Encoding.UTF8.GetString(buf);
                 return str;
             }
         }
 
-        public static string ReadTree(this (string type, long offset, int size, string filename) src)
+        public static List<(string tt, string id)> ReadTree(this (string type, long offset, int size, string filename) src)
         {
+            List<(string tt, string id)> tree = new List<(string tt, string id)>();
             using (var stream = File.OpenRead(src.filename))
             using (var zlib = new ZLibStream(stream, CompressionMode.Decompress))
+            using(var br = new BinaryReader(zlib))
             {
                 var buf = new byte[4096];
                 zlib.Read(buf, 0, (int)src.offset);
-                zlib.Read(buf, 0, src.size);
-                var str = Encoding.UTF8.GetString(buf);
-                return str;
+                var readlen = zlib.Read(buf, 0, buf.Length);
+                
+                bool pare1 = true;
+                List<byte> temp = new List<byte>();
+                for(int i=0; i< readlen; i++)
+                {
+                    if(pare1 == true)
+                    {
+                        if (buf[i] == 0)
+                        {
+                            var dd = Encoding.UTF8.GetString(temp.ToArray());
+                            var id = BitConverter.ToString(buf, i, 20).Replace("-", "");
+                            tree.Add((dd, id));
+                            i = i + 20;
+                            
+                            temp = new List<byte>();
+                        }
+                        else
+                        {
+                            temp.Add(buf[i]);
+                        }
+                    }
+                }
+
+                return tree;
             }
+        }
+
+        static List<List<byte>> Split(this Span<byte> src, byte delet)
+        {
+            List<List<byte>> dst = new List<List<byte>>();
+            List<byte> temp = new List<byte>();
+            
+            for (int i = 0;i<src.Length ; i++)
+            {
+                if (src[i] == delet)
+                {
+                    dst.Add(temp);
+                    temp = new List<byte>();
+                }
+                else
+                {
+                    temp.Add(src[i]);
+                }
+            }
+            if(temp.Count > 0)
+            {
+                dst.Add(temp);
+            }
+            
+            return dst;
         }
 
         public static string ReadCommit(this (string type, long offset, int size, string filename) src)
