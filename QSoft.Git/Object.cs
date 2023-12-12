@@ -133,11 +133,17 @@ namespace QSoft.Git.Object
 
 //update
 //1.parse object
-                var regex = new Regex(@"tree (?<tree>\w+)\r\nparent (?<parent>)");
+                var regex = new Regex(@"tree (?<tree>\w+)\nparent (?<parent>\w+)\nauthor (?<author>\w.+)\ncommitter (?<committer>\w.+)\n\n(?<cc>)");
                 var hr = regex.Match(str);
                 if (hr.Success)
                 {
-
+                    var tree = hr.Groups["tree"];
+                    var parent = hr.Groups["parent"];
+                    var author = hr.Groups["author"];
+                    var committer = hr.Groups["committer"];
+                    int sszie = str.Length - hr.Groups["cc"].Index;
+                    var aa = new string(str.ToArray(), hr.Groups["cc"].Index, sszie);
+                    var dd = str.Skip(hr.Groups["cc"].Index).Take(sszie);
                 }
                 return str;
             }
