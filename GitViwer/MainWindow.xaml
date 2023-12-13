@@ -11,7 +11,17 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <ListView x:Name="listview"></ListView>
+        <ListView SelectionChanged="listview_SelectionChanged" SelectionMode="Single" ItemsSource="{Binding GitObjects}" x:Name="listview">
+            <ListView.View>
+                <GridView>
+                    <GridView.Columns>
+                        <GridViewColumn Header="Type" DisplayMemberBinding="{Binding Type}"/>
+                        <GridViewColumn Header="Length" DisplayMemberBinding="{Binding Length}"/>
+                        <GridViewColumn Header="FileName" DisplayMemberBinding="{Binding FileName}"/>
+                    </GridView.Columns>
+                </GridView>
+            </ListView.View>
+        </ListView>
         <Frame x:Name="frame" Grid.Column="1"></Frame>
     </Grid>
 </Window>
