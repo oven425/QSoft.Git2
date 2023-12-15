@@ -64,11 +64,11 @@ namespace QSoft.Git
                     readbuf = new byte[2];
                     readlen = file.Read(readbuf);
                     var size1 = BitConverter.ToInt16(readbuf.Reverse().ToArray(), 0) & 0xfff;
-                    if (size < 0xfff)
-                    {
+                    //if (size < 0xfff)
+                    //{
 
-                    }
-                    else
+                    //}
+                    //else
                     {
                         var lls = new List<byte>();
                         while (true)

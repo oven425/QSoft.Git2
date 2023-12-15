@@ -20,14 +20,18 @@ namespace GitViwer
     /// </summary>
     public partial class BlobPage : Page
     {
-        public BlobPage()
+        BlobViewModel m_ViewModel;
+        public BlobPage(BlobViewModel viewmodel)
         {
             InitializeComponent();
+            this.DataContext = this.m_ViewModel = viewmodel;
         }
     }
 
     public class BlobViewModel
     {
-        public BlobViewModel() { }
+        public BlobViewModel(string type) 
+        {
+        }
     }
 }

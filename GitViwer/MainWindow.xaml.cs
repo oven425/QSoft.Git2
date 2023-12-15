@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.DependencyInjection;
 using QSoft.Git.Object;
 using System.Collections.ObjectModel;
 using System.Text;
@@ -19,26 +20,25 @@ namespace GitViwer
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        MainWindowViewModel m_ViewModel;
+        public MainWindow(MainWindowViewModel viewmodel)
         {
             InitializeComponent();
-            ObjectsViewModel vm = new ObjectsViewModel();
-            this.DataContext = vm;
+            this.DataContext = m_ViewModel = viewmodel;
         }
 
         private void listview_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var listview = sender as ListView;
             var obj = listview?.SelectedItem as GitObject;
-            
         }
     }
 
 
-    public partial class ObjectsViewModel:ObservableObject
+    public partial class MainWindowViewModel : ObservableObject
     {
         public ObservableCollection<GitObject> GitObjects { get; set; } = new ObservableCollection<GitObject>();
-        public ObjectsViewModel()
+        public MainWindowViewModel()
         {
             var objectfolder = @"C:\Users\oven4\source\repos\QSoft.Git2\.git\objects";
             var objs = objectfolder.EnumbleObject();

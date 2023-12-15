@@ -16,21 +16,32 @@ namespace GitViwer
     {
         public App()
         {
-            var services = new ServiceCollection();
-            services.AddSingleton(new GitObject());
-            services.AddTransient<BlobPage>();
-            services.AddTransient<BlobViewModel>();
+            //var services = new ServiceCollection();
+            //services.AddSingleton(new GitObject());
+            //services.AddTransient<BlobPage>();
+            //services.AddTransient<BlobViewModel>();
 
-            var host = Host.CreateApplicationBuilder();
-            host.Services.AddTransient<BlobPage>()
-                .AddTransient<BlobViewModel>();
+            var builder = Host.CreateApplicationBuilder();
+            builder.Services.AddTransient<BlobPage>()
+                .AddTransient<BlobViewModel>()
+                .AddTransient<MainWindow>()
+                .AddTransient<MainWindowViewModel>();
 
-            var builder = host.Build();
-            
+            var host = builder.Build();
+            //host.StartAsync();
+            ActivatorUtilities.CreateInstance<BlobViewModel>(host.Services, "aaa");
 
 
 
 
+        }
+    }
+
+    public class BlobPageService
+    {
+
+        public void AA()
+        {
 
         }
     }
