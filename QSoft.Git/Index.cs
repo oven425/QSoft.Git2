@@ -13,7 +13,7 @@ namespace QSoft.Git
 
         }
     }
-
+    //git ls-files -s
     static public class IndexExtension
     {
         public static void ReadIndex(this string src)
@@ -30,7 +30,7 @@ namespace QSoft.Git
                 readlen = file.Read(readbuf);
                 var entries = BitConverter.ToInt32(readbuf.Reverse().ToArray(), 0);
 
-                while (true)
+                for(int i=0;i<entries;i++)
                 {
                     var begin_pos = file.Position;
                     readbuf = new byte[4];
@@ -64,11 +64,18 @@ namespace QSoft.Git
                     readbuf = new byte[2];
                     readlen = file.Read(readbuf);
                     var size1 = BitConverter.ToInt16(readbuf.Reverse().ToArray(), 0) & 0xfff;
-                    //if (size < 0xfff)
-                    //{
 
-                    //}
-                    //else
+
+                    var entrylen = 62;
+                    if (size1 < 0xfff)
+                    {
+                        readbuf = new byte[size1+1];
+                        readlen = file.Read(readbuf);
+                        var h = Encoding.UTF8.GetString(readbuf, 0, size1);
+                        System.Diagnostics.Trace.WriteLine($"{sha1} {h}");
+                        entrylen = entrylen + size1;
+                    }
+                    else
                     {
                         var lls = new List<byte>();
                         while (true)
@@ -83,8 +90,9 @@ namespace QSoft.Git
                         var h = Encoding.UTF8.GetString(lls.ToArray());
                         System.Diagnostics.Trace.WriteLine(h);
                     }
-                    readlen = file.Read(readbuf);
-                    var field = BitConverter.ToInt16(readbuf.Reverse().ToArray(), 0);
+                    //readbuf = new byte[2];
+                    //readlen = file.Read(readbuf);
+                    //var field = BitConverter.ToInt16(readbuf.Reverse().ToArray(), 0);
                     var len1 = file.Position - begin_pos;
                     int nullsize = 8;
                     var aa = len1 % nullsize;
@@ -97,7 +105,9 @@ namespace QSoft.Git
                         readlen = file.Read(readbuf);
                     }
                 }
-                
+
+
+                var po = file.Length - file.Position;
             }
         }
     }

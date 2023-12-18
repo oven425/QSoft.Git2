@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using QSoft.Git.Object;
 using System.Collections.ObjectModel;
@@ -18,7 +19,7 @@ namespace GitViwer
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IShellWindow
     {
         MainWindowViewModel m_ViewModel;
         public MainWindow(MainWindowViewModel viewmodel)
@@ -27,11 +28,42 @@ namespace GitViwer
             this.DataContext = m_ViewModel = viewmodel;
         }
 
-        private void listview_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        public void CloseWindow()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Frame GetNavigationFrame() => this.frame;
+
+        public void ShowWindow()
+        {
+            throw new NotImplementedException();
+        }
+
+        private async void listview_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var listview = sender as ListView;
             var obj = listview?.SelectedItem as GitObject;
+            if (obj != null)
+            {
+                if (obj.Type == "blob")
+                {
+                    var page = new BlobPage(new BlobViewModel());
+                    this.frame.Navigate(page, obj);
+                    var aware = page.DataContext as INavigationAware;
+                    aware?.OnNavigatedTo(obj);
+                }
+            }
         }
+    }
+
+    public interface IShellWindow
+    {
+        Frame GetNavigationFrame();
+
+        void ShowWindow();
+
+        void CloseWindow();
     }
 
 
@@ -51,6 +83,21 @@ namespace GitViwer
                     Length = oo.size,
                     FileName = System.IO.Path.GetFileName(oo.filename)
                 });
+            }
+
+        }
+        [ObservableProperty]
+        GitObject gitobj;
+        [RelayCommand]
+        public void SelectGitObject(SelectionChangedEventArgs? parameter)
+        {
+            var dd = this.Gitobj.Data.ReadBlob();
+            if (this.Gitobj.Type == "blob")
+            {
+                var page = new BlobPage(new BlobViewModel());
+                //this.frame.Navigate(page);
+                var aware = page.DataContext as INavigationAware;
+                aware?.OnNavigatedTo(this.Gitobj);
             }
         }
     }

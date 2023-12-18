@@ -1,5 +1,8 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using QSoft.Git.Object;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,12 +29,43 @@ namespace GitViwer
             InitializeComponent();
             this.DataContext = this.m_ViewModel = viewmodel;
         }
+
     }
 
-    public class BlobViewModel
+    public partial class BlobViewModel: ObservableObject, INavigationAware
     {
-        public BlobViewModel(string type) 
+        [ObservableProperty]
+        private string data;
+        public BlobViewModel() 
         {
+           
         }
+
+        public void OnNavigatedFrom()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnNavigatedTo(object parameter)
+        {
+            var gitobj = parameter as GitObject;
+            this.Data = gitobj.Data.ReadBlob();
+            //using (var file = File.OpenRead(gitobj.Data.filename))
+            //using(var br = new BinaryReader(file))
+            //{
+            //    file.Position = gitobj.Data.offset;
+            //    this.Data = br.ReadString();
+            //}
+
+                //this.Data = File.ReadAllText(gitobj?.Data.filename);
+            //throw new NotImplementedException();
+        }
+    }
+
+    public interface INavigationAware
+    {
+        void OnNavigatedTo(object parameter);
+
+        void OnNavigatedFrom();
     }
 }
