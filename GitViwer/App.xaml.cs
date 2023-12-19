@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using GitViwer.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.ComponentModel.Design;
@@ -34,6 +35,7 @@ namespace GitViwer
         void ConfigService(IServiceCollection services)
         {
             services.AddHostedService<ApplicationHostService>();
+            services.AddSingleton<INavigationService, NavigationService>();
             services.AddTransient<MainWindowViewModel>();
             services.AddTransient<MainWindow>();
             services.AddTransient<BlobPage>();
@@ -46,28 +48,5 @@ namespace GitViwer
         }
     }
 
-    public class ApplicationHostService : IHostedService
-    {
-        IServiceProvider m_ServiceProvider;
-        public ApplicationHostService(IServiceProvider sp)
-        {
-            this.m_ServiceProvider = sp;
-        }
-
-        Task IHostedService.StartAsync(CancellationToken cancellationToken)
-        {
-            if(App.Current.Windows.Count == 0)
-            {
-                var window=this.m_ServiceProvider.GetService<MainWindow>();
-                window?.Show();
-            }
-            return Task.CompletedTask;
-        }
-
-        Task IHostedService.StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-    }
 
 }

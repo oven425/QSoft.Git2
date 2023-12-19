@@ -29,6 +29,6 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <Frame x:Name="frame" Grid.Column="1"></Frame>
+        <Frame x:Name="frame" Grid.Column="1" NavigationUIVisibility="Hidden"></Frame>
     </Grid>
 </Window>

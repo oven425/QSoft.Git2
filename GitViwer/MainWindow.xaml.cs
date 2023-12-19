@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GitViwer.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using QSoft.Git.Object;
 using System.Collections.ObjectModel;
@@ -70,8 +71,10 @@ namespace GitViwer
     public partial class MainWindowViewModel : ObservableObject
     {
         public ObservableCollection<GitObject> GitObjects { get; set; } = new ObservableCollection<GitObject>();
-        public MainWindowViewModel()
+        INavigationService m_NavigationService;
+        public MainWindowViewModel(INavigationService navigateservice)
         {
+            this.m_NavigationService = navigateservice;
             var objectfolder = @"C:\Users\oven4\source\repos\QSoft.Git2\.git\objects";
             var objs = objectfolder.EnumbleObject();
             foreach (var oo in objs)
@@ -94,10 +97,12 @@ namespace GitViwer
             var dd = this.Gitobj.Data.ReadBlob();
             if (this.Gitobj.Type == "blob")
             {
-                var page = new BlobPage(new BlobViewModel());
-                //this.frame.Navigate(page);
-                var aware = page.DataContext as INavigationAware;
-                aware?.OnNavigatedTo(this.Gitobj);
+                this.m_NavigationService.NavigateTo<BlobPage>(this.Gitobj);
+                //var page = new BlobPage(new BlobViewModel());
+                ////this.frame.Navigate(page);
+                //m_NavigationService.NavigateTo("", this.gitobj);
+                //var aware = page.DataContext as INavigationAware;
+                //aware?.OnNavigatedTo(this.Gitobj);
             }
         }
     }

@@ -9,6 +9,6 @@
       Title="BlobPage">
 
     <Grid>
-        <TextBox Text="{Binding Data}"/>
+        <TextBox HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Text="{Binding Data}"/>
     </Grid>
 </Page>
