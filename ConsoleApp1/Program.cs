@@ -5,32 +5,42 @@ using System.Buffers.Binary;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 //1701874466
 
 DateTime basetime = new DateTime(1970, 1, 1);
 var tt = basetime.AddSeconds(1701874466).AddHours(8);
 
-var index = @"C:\Users\oven4\source\repos\QSoft.Git2\.git\index";
-index.ReadIndex();
+var regex1 = new Regex(@"(?<edit>\w+)<(?<mail>\w+)> (?<timestmap>\d+) +(?<offset>\d+)");
+var str = "qoo <lkk@yahoo.com.tw> 1663316929 +0800";
+var mm = regex1.Match(str);
+if(mm.Success)
+{
+
+}
+
+//var index = @"C:\Users\oven4\source\repos\QSoft.Git2\.git\index";
+//index.ReadIndex();
 
 
-var objectfolder = @"C:\Users\oven4\source\repos\QSoft.Git2\.git\objects";
+var objectfolder = @"C:\Users\oven4\source\repos\QSoft.Registry\.git\objects";
 var objs = objectfolder.EnumbleObject();
 foreach (var oo in objs)
 {
-    if(oo.type == "blob")
-    {
-        oo.ReadBlob();
-    }
-    else if (oo.type == "tree")
-    {
-        oo.ReadTree();
-    }
-    else if (oo.type == "commit")
-    {
-        oo.ReadCommit();
-    }
+    System.Diagnostics.Trace.WriteLine($"{oo.type} {oo.size}");
+    //if(oo.type == "blob")
+    //{
+    //    oo.ReadBlob();
+    //}
+    //else if (oo.type == "tree")
+    //{
+    //    oo.ReadTree();
+    //}
+    //else if (oo.type == "commit")
+    //{
+    //    oo.ReadCommit();
+    //}
 }
 var dirs = Directory.EnumerateDirectories(objectfolder)
     .SelectMany(x => Directory.EnumerateFiles(x));

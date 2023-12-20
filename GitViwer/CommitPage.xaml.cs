@@ -1,4 +1,7 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using GitViwer.Contracts;
+using QSoft.Git.Object;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +23,32 @@ namespace GitViwer
     /// </summary>
     public partial class CommitPage : Page
     {
-        public CommitPage()
+
+        public CommitPage(CommitViewModel viewmodel)
         {
             InitializeComponent();
+            this.DataContext = viewmodel;
+        }
+    }
+
+    public partial class CommitViewModel : ObservableObject, INavigationAware
+    {
+        [ObservableProperty]
+        private string data;
+        public CommitViewModel()
+        {
+
+        }
+
+        public void OnNavigatedFrom()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnNavigatedTo(object parameter)
+        {
+            var gitobj = parameter as GitObject;
+            var aa = gitobj.Data.ReadCommit();
         }
     }
 }

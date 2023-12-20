@@ -12,12 +12,12 @@ using System.Threading.Tasks;
 
 namespace QSoft.Git.Object
 {
-    public class Blob
-    {
-        public string Type { set; get; }
-        public Range Length { set; get; } = new Range(10, 10);
-        public string FullName { private set; get; }
-    }
+    //public class Blob
+    //{
+    //    public string Type { set; get; }
+    //    public Range Length { set; get; } = new Range(10, 10);
+    //    public string FullName { private set; get; }
+    //}
 
     public static class GitObjectExtension
     {
@@ -117,7 +117,7 @@ namespace QSoft.Git.Object
             return dst;
         }
 
-        public static string ReadCommit(this (string type, long offset, int size, string filename) src)
+        public static (string tree, string parent, string author, string committer) ReadCommit(this (string type, long offset, int size, string filename) src)
         {
             using (var stream = File.OpenRead(src.filename))
             using (var zlib = new ZLibStream(stream, CompressionMode.Decompress))
@@ -126,26 +126,38 @@ namespace QSoft.Git.Object
                 zlib.Read(buf, 0, (int)src.offset);
                 zlib.Read(buf, 0, src.size);
                 var str = Encoding.UTF8.GetString(buf);
-//tree db2c57d040432f1cba0a44e9322e37a0262dfe79
-//parent c35f5da934412efad46bfdd612f2891c1d06b9f3
-//author oven425<oven425@yahoo.com.tw> 1701874466 + 0800
-//committer oven425<oven425@yahoo.com.tw> 1701874466 + 0800
+                //tree db2c57d040432f1cba0a44e9322e37a0262dfe79
+                //parent c35f5da934412efad46bfdd612f2891c1d06b9f3
+                //author oven425<oven425@yahoo.com.tw> 1701874466 + 0800
+                //committer oven425<oven425@yahoo.com.tw> 1701874466 + 0800
 
-//update
-//1.parse object
+                //update
+                //1.parse object
+
+                var func = (string src) =>
+                {
+                    var regex1 = new Regex(@"(?<edit>\w+)<(?<mail>\w+)> (?<timestmap>\d+) [+](?<offset>\d+)");
+                    var mm = regex1.Match(src);
+                    if(mm.Success)
+                    {
+
+                    }
+                };
                 var regex = new Regex(@"tree (?<tree>\w+)\nparent (?<parent>\w+)\nauthor (?<author>\w.+)\ncommitter (?<committer>\w.+)\n\n(?<cc>)");
                 var hr = regex.Match(str);
                 if (hr.Success)
                 {
-                    var tree = hr.Groups["tree"];
-                    var parent = hr.Groups["parent"];
-                    var author = hr.Groups["author"];
-                    var committer = hr.Groups["committer"];
+                    var tree = hr.Groups["tree"].Value;
+                    var parent = hr.Groups["parent"].Value;
+                    var author = hr.Groups["author"].Value;
+                    func(author);
+                    var committer = hr.Groups["committer"].Value;
                     int sszie = str.Length - hr.Groups["cc"].Index;
                     var aa = new string(str.ToArray(), hr.Groups["cc"].Index, sszie);
                     var dd = str.Skip(hr.Groups["cc"].Index).Take(sszie);
+                    return (tree, parent, author, author);
                 }
-                return str;
+                return ("", "", "", "");
             }
         }
 

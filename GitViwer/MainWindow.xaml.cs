@@ -75,7 +75,7 @@ namespace GitViwer
         public MainWindowViewModel(INavigationService navigateservice)
         {
             this.m_NavigationService = navigateservice;
-            var objectfolder = @"C:\Users\oven4\source\repos\QSoft.Git2\.git\objects";
+            var objectfolder = @"C:\Users\oven4\source\repos\QSoft.Registry\.git\objects";
             var objs = objectfolder.EnumbleObject();
             foreach (var oo in objs)
             {
@@ -98,12 +98,12 @@ namespace GitViwer
             if (this.Gitobj.Type == "blob")
             {
                 this.m_NavigationService.NavigateTo<BlobPage>(this.Gitobj);
-                //var page = new BlobPage(new BlobViewModel());
-                ////this.frame.Navigate(page);
-                //m_NavigationService.NavigateTo("", this.gitobj);
-                //var aware = page.DataContext as INavigationAware;
-                //aware?.OnNavigatedTo(this.Gitobj);
             }
+            _ = this.Gitobj.Type switch
+            {
+                "blob" => this.m_NavigationService.NavigateTo<BlobPage>(this.Gitobj),
+                "commit" => this.m_NavigationService.NavigateTo<CommitPage>(this.Gitobj),
+            };
         }
     }
 

@@ -40,6 +40,8 @@ namespace GitViwer
             services.AddTransient<MainWindow>();
             services.AddTransient<BlobPage>();
             services.AddTransient<BlobViewModel>();
+            services.AddTransient<CommitPage>();
+            services.AddTransient<CommitViewModel>();
         }
 
         private async void Application_Exit(object sender, ExitEventArgs e)

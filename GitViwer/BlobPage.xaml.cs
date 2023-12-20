@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using GitViwer.Contracts;
 using QSoft.Git.Object;
 using System;
 using System.Collections.Generic;
@@ -62,10 +63,5 @@ namespace GitViwer
         }
     }
 
-    public interface INavigationAware
-    {
-        void OnNavigatedTo(object parameter);
-
-        void OnNavigatedFrom();
-    }
+    
 }
