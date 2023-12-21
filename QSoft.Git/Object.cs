@@ -117,7 +117,7 @@ namespace QSoft.Git.Object
             return dst;
         }
 
-        public static (string tree, string parent, string author, string committer) ReadCommit(this (string type, long offset, int size, string filename) src)
+        public static (string tree, string parent, (string edit, string mail, DateTime utc, TimeSpan zone) author, (string edit, string mail, DateTime utc, TimeSpan zone) committer) ReadCommit(this (string type, long offset, int size, string filename) src)
         {
             using (var stream = File.OpenRead(src.filename))
             using (var zlib = new ZLibStream(stream, CompressionMode.Decompress))
@@ -134,15 +134,29 @@ namespace QSoft.Git.Object
                 //update
                 //1.parse object
 
-                var func = (string src) =>
+                var parsecommit = (string src) =>
                 {
-                    var regex1 = new Regex(@"(?<edit>\w+)<(?<mail>\w+)> (?<timestmap>\d+) [+](?<offset>\d+)");
+                    var regex1 = new Regex(@"(?<edit>\w+) [<](?<mail>\w.+)[>] (?<timestamp>\d+) (?<offset1>\+|-)(?<offset2>\w+)");
                     var mm = regex1.Match(src);
-                    if(mm.Success)
+                    if (mm.Success)
                     {
-
+                        var editor = mm.Groups["edit"].Value;
+                        var mail = mm.Groups["mail"].Value;
+                        var timestamp = mm.Groups["timestamp"].Value;
+                        var offset1 = mm.Groups["offset1"].Value;
+                        var offset2 = mm.Groups["offset2"].Value;
+                        var sec = int.Parse(timestamp);
+                        var utc = new DateTime(1970, 1, 1).AddSeconds(sec);
+                        var zone = TimeSpan.Parse(offset1 switch
+                        {
+                            "+" => $"{offset2.Insert(2, ":")}",
+                            "-" => $"-{offset2.Insert(2, ":")}"
+                        });
+                        return (editor, mail, utc, zone);
                     }
+                    return ("", "", DateTime.MinValue, TimeSpan.Zero);
                 };
+
                 var regex = new Regex(@"tree (?<tree>\w+)\nparent (?<parent>\w+)\nauthor (?<author>\w.+)\ncommitter (?<committer>\w.+)\n\n(?<cc>)");
                 var hr = regex.Match(str);
                 if (hr.Success)
@@ -150,14 +164,14 @@ namespace QSoft.Git.Object
                     var tree = hr.Groups["tree"].Value;
                     var parent = hr.Groups["parent"].Value;
                     var author = hr.Groups["author"].Value;
-                    func(author);
+                    //parsecommit(author);
                     var committer = hr.Groups["committer"].Value;
                     int sszie = str.Length - hr.Groups["cc"].Index;
                     var aa = new string(str.ToArray(), hr.Groups["cc"].Index, sszie);
                     var dd = str.Skip(hr.Groups["cc"].Index).Take(sszie);
-                    return (tree, parent, author, author);
+                    return (tree, parent, parsecommit(author), parsecommit(committer));
                 }
-                return ("", "", "", "");
+                return ("", "", ("","", DateTime.MinValue, TimeSpan.Zero), ("", "", DateTime.MinValue, TimeSpan.Zero));
             }
         }
 
