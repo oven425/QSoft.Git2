@@ -7,11 +7,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-
-var fff = (string a) =>
-{
-    return 0;
-};
 //1701874466
 var parsecommit = (string src) =>
 {
@@ -30,7 +25,7 @@ var parsecommit = (string src) =>
         {
             "+" => $"{offset2.Insert(2, ":")}",
             "-" => $"-{offset2.Insert(2, ":")}",
-            _=>""
+            _=>"00:00"
         });
         return (editor, mail, utc, zone);
     }

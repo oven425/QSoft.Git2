@@ -35,7 +35,7 @@ namespace QSoft.Git.Object
                 .SelectMany(x => Directory.EnumerateFiles(x));
             foreach(var oo in files)
             {
-                System.Diagnostics.Trace.WriteLine(oo);
+                //System.Diagnostics.Trace.WriteLine(oo);
                 var dd = oo.ParseObject();
                 yield return (dd.type, dd.offset, dd.size, oo);
             }
@@ -150,14 +150,15 @@ namespace QSoft.Git.Object
                         var zone = TimeSpan.Parse(offset1 switch
                         {
                             "+" => $"{offset2.Insert(2, ":")}",
-                            "-" => $"-{offset2.Insert(2, ":")}"
+                            "-" => $"-{offset2.Insert(2, ":")}",
+                            _=>"00:00"
                         });
                         return (editor, mail, utc, zone);
                     }
                     return ("", "", DateTime.MinValue, TimeSpan.Zero);
                 };
 
-                var regex = new Regex(@"tree (?<tree>\w+)\nparent (?<parent>\w+)\nauthor (?<author>\w.+)\ncommitter (?<committer>\w.+)\n\n(?<cc>)");
+                var regex = new Regex(@"tree (?<tree>\w+)\nparent (?<parent>\w+)\nauthor (?<author>\w.+)\ncommitter (?<committer>\w.+)\n\n(?<cc>\w.+)", RegexOptions.Multiline);
                 var hr = regex.Match(str);
                 if (hr.Success)
                 {
