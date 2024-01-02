@@ -70,10 +70,12 @@ namespace GitViwer
 
     public partial class MainWindowViewModel : ObservableObject
     {
+        QSoft.Git.Repository m_Repository;
         public ObservableCollection<GitObject> GitObjects { get; set; } = new ObservableCollection<GitObject>();
         INavigationService m_NavigationService;
         public MainWindowViewModel(INavigationService navigateservice)
         {
+            this.m_Repository = QSoft.Git.Repository.Open("../../../../test");
             this.m_NavigationService = navigateservice;
             var objectfolder = @"C:\Users\oven4\source\repos\QSoft.Registry\.git\objects";
             var objs = objectfolder.EnumbleObject();
