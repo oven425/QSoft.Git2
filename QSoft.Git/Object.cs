@@ -12,13 +12,6 @@ using System.Threading.Tasks;
 
 namespace QSoft.Git.Object
 {
-    //public class Blob
-    //{
-    //    public string Type { set; get; }
-    //    public Range Length { set; get; } = new Range(10, 10);
-    //    public string FullName { private set; get; }
-    //}
-
     public static class GitObjectExtension
     {
         public static IEnumerable<(string type, long offset, int size, string filename)> EnumbleObject(this string objectfolder)

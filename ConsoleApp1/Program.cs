@@ -6,7 +6,7 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-
+var brs = "../../../../test/.git/refs/heads".EnumableBranch();
 //1701874466
 var parsecommit = (string src) =>
 {
