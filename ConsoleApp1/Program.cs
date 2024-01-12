@@ -6,8 +6,17 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-var brs = "../../../../test/.git/refs/heads".EnumableBranch();
-//1701874466
+using static System.Net.Mime.MediaTypeNames;
+//var brs = "../../../../test/.git/refs/heads".EnumableBranch();
+
+
+//https://stackoverflow.com/questions/6804586/how-to-conditional-regex
+//tree 65a457425a679cbe9adf0d2741785d3ceabb44a7
+//author oven425<oven425@yahoo.com.tw> 1704203885 +0800
+//committer oven425 <oven425 @yahoo.com.tw> 1704203885 +0800
+//
+//add a.txt
+
 var parsecommit = (string src) =>
 {
     var regex1 = new Regex(@"(?<edit>\w+) [<](?<mail>\w.+)[>] (?<timestamp>\d+) (?<offset1>\+|-)(?<offset2>\w+)");
