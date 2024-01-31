@@ -105,6 +105,8 @@ namespace GitViwer
             {
                 "blob" => this.m_NavigationService.NavigateTo<BlobPage>(this.Gitobj),
                 "commit" => this.m_NavigationService.NavigateTo<CommitPage>(this.Gitobj),
+                "tree"=>this.m_NavigationService.NavigateTo<TreePage>(this.Gitobj),
+                _=>false
             };
         }
     }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO.Compression;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -139,17 +140,42 @@ namespace QSoft.Git.Object
                         var offset1 = mm.Groups["offset1"].Value;
                         var offset2 = mm.Groups["offset2"].Value;
                         var sec = int.Parse(timestamp);
-                        var utc = new DateTime(1970, 1, 1).AddSeconds(sec);
+                        var utc = DateTime.UnixEpoch.AddSeconds(sec);
                         var zone = TimeSpan.Parse(offset1 switch
                         {
                             "+" => $"{offset2.Insert(2, ":")}",
                             "-" => $"-{offset2.Insert(2, ":")}",
-                            _=>"00:00"
+                            _ => "00:00"
                         });
                         return (editor, mail, utc, zone);
                     }
                     return ("", "", DateTime.MinValue, TimeSpan.Zero);
                 };
+
+
+                var lastindex = str.LastIndexOf("\n\n");
+                
+                if (lastindex != -1)
+                {
+                    var msg = str.Substring(lastindex+2, str.Length - lastindex-2);
+                }
+
+                var sr = new StringReader(str.Substring(0, lastindex==-1?str.Length: lastindex));
+                while (true)
+                {
+                    var line = sr.ReadLine();
+                    
+                    if(line == null) break;
+                    var reg_header = new Regex(@"(?<header>\w.+) (?<content>\w.+)");
+                    var mm = reg_header.Match(line);
+                    if(mm.Success)
+                    {
+                        switch(mm.Groups["header"].Value)
+                        {
+
+                        }
+                    }
+                }
 
                 var regex = new Regex(@"tree (?<tree>\w+)\nparent (?<parent>\w+)\nauthor (?<author>\w.+)\ncommitter (?<committer>\w.+)\n\n(?<cc>\w.+)", RegexOptions.Multiline);
                 var hr = regex.Match(str);
