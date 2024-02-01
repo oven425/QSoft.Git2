@@ -161,36 +161,65 @@ namespace QSoft.Git.Object
                 }
 
                 var sr = new StringReader(str.Substring(0, lastindex==-1?str.Length: lastindex));
+                var keyvalues = new List<(string, string)>();
                 while (true)
                 {
                     var line = sr.ReadLine();
                     
                     if(line == null) break;
-                    var reg_header = new Regex(@"(?<header>\w.+) (?<content>\w.+)");
-                    var mm = reg_header.Match(line);
-                    if(mm.Success)
+                    var spaceindex = line.IndexOf(' ');
+                    if(spaceindex != -1)
                     {
-                        switch(mm.Groups["header"].Value)
-                        {
+                        keyvalues.Add((line.Substring(0, spaceindex), line.Substring(spaceindex+2, line.Length- spaceindex-2)));
+                    }
+                    //var reg_header = new Regex(@"(?<header>\w.+)[ ](?<content>\w.+)");
+                    //var mm = reg_header.Match(line);
+                    //if(mm.Success)
+                    //{
+                    //    keyvalues.Add((mm.Groups["header"].Value, mm.Groups["content"].Value));
+                    //}
+                }
 
-                        }
+                var tree = "";
+                var parent = "";
+                var author = ("", "", DateTime.MinValue, TimeSpan.Zero);
+                var commiter = ("", "", DateTime.MinValue, TimeSpan.Zero);
+                foreach (var oo in keyvalues)
+                {
+                    switch(oo.Item1)
+                    {
+                        case "tree":
+                            tree = oo.Item2;
+                            break;
+                        case "parent":
+                            parent = oo.Item2;
+                            break;
+                        case "committer":
+                            commiter = parsecommit(oo.Item2);
+                            break;
+                        case "author":
+                            author = parsecommit(oo.Item2);
+                            break;
                     }
                 }
 
-                var regex = new Regex(@"tree (?<tree>\w+)\nparent (?<parent>\w+)\nauthor (?<author>\w.+)\ncommitter (?<committer>\w.+)\n\n(?<cc>\w.+)", RegexOptions.Multiline);
-                var hr = regex.Match(str);
-                if (hr.Success)
-                {
-                    var tree = hr.Groups["tree"].Value;
-                    var parent = hr.Groups["parent"].Value;
-                    var author = hr.Groups["author"].Value;
-                    //parsecommit(author);
-                    var committer = hr.Groups["committer"].Value;
-                    int sszie = str.Length - hr.Groups["cc"].Index;
-                    var aa = new string(str.ToArray(), hr.Groups["cc"].Index, sszie);
-                    var dd = str.Skip(hr.Groups["cc"].Index).Take(sszie);
-                    return (tree, parent, parsecommit(author), parsecommit(committer));
-                }
+                return (tree, parent, author, commiter);
+
+
+                //var regex = new Regex(@"tree (?<tree>\w+)\nparent (?<parent>\w+)\nauthor (?<author>\w.+)\ncommitter (?<committer>\w.+)\n\n(?<cc>\w.+)", RegexOptions.Multiline);
+                //var hr = regex.Match(str);
+                //if (hr.Success)
+                //{
+                //    var tree = hr.Groups["tree"].Value;
+                //    var parent = hr.Groups["parent"].Value;
+                //    var author = hr.Groups["author"].Value;
+                //    //parsecommit(author);
+                //    var committer = hr.Groups["committer"].Value;
+                //    int sszie = str.Length - hr.Groups["cc"].Index;
+                //    var aa = new string(str.ToArray(), hr.Groups["cc"].Index, sszie);
+                //    var dd = str.Skip(hr.Groups["cc"].Index).Take(sszie);
+                //    return (tree, parent, parsecommit(author), parsecommit(committer));
+                //}
                 return ("", "", ("","", DateTime.MinValue, TimeSpan.Zero), ("", "", DateTime.MinValue, TimeSpan.Zero));
             }
         }

@@ -34,11 +34,14 @@ namespace GitViwer
     public partial class CommitViewModel : ObservableObject, INavigationAware
     {
         [ObservableProperty]
-        private string data;
-        public CommitViewModel()
-        {
+        private string? tree;
+        [ObservableProperty]
+        private string? parent;
+        [ObservableProperty]
+        (string, string, DateTime, TimeSpan) committer;
+        [ObservableProperty]
+        private string? message;
 
-        }
 
         public void OnNavigatedFrom()
         {
@@ -49,6 +52,9 @@ namespace GitViwer
         {
             var gitobj = parameter as GitObject;
             var aa = gitobj.Data.ReadCommit();
+            this.Parent = aa.parent;
+            this.Tree = aa.tree;
+            this.Committer = aa.committer;
         }
     }
 }
